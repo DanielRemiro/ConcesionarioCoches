@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+
 }
 
 android {
@@ -59,9 +61,10 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    // RETROFIT (Para hacer las llamadas a la API)
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
-
-    // CONVERTER GSON (Para transformar el JSON a tus objetos Kotlin automáticamente)
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.common.jvm)
+    ksp("androidx.room:room-compiler:2.6.1")
+
 }
