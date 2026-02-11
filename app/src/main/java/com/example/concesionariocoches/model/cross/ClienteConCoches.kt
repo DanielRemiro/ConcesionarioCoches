@@ -5,6 +5,7 @@ import androidx.room.Junction
 import androidx.room.Relation
 import com.example.concesionariocoches.model.cliente.ClienteEntity
 import com.example.concesionariocoches.model.coche.CocheEntity
+import com.example.concesionariocoches.model.cross.CocheClienteCrossRef
 
 data class ClienteConCoches(
     @Embedded val cliente: ClienteEntity,
@@ -12,7 +13,7 @@ data class ClienteConCoches(
     @Relation(
         parentColumn = "clienteId",
         entityColumn = "cocheId",
-        associateBy = Junction(ClienteCocheCrossRef::class) // Aquí ocurre la magia
+        associateBy = Junction(CocheClienteCrossRef::class) // Aquí ocurre la magia
     )
     val cochesInteres: List<CocheEntity> // Esto es lo que en tu JSON era "cochesInteresIds"
 )
