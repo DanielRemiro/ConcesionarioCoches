@@ -1,6 +1,10 @@
+// Archivo: api/ConcesionarioApi.kt
 package com.example.concesionariocoches.api
 
 import com.example.concesionariocoches.api.dto.CocheDto
+import com.example.concesionariocoches.api.dto.ClienteDto // Asegúrate de importar esto
+import com.example.concesionariocoches.api.dto.MarcaDto
+import com.example.concesionariocoches.api.dto.MatriculaDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -9,9 +13,7 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ConcesionarioApi {
-    // MODIFICADO: Añadimos _expand para evitar error de Foreign Key en Room
-    @GET("coche?_expand=marca&_expand=matricula")
-    suspend fun getCoches(): List<CocheDto>
+    // GET de Coches (Asegúrate que sea 'coche' o 'coches' según tu json-server)
 
     @POST("coche")
     suspend fun crearCoche(@Body coche: CocheDto): CocheDto
@@ -21,4 +23,17 @@ interface ConcesionarioApi {
 
     @DELETE("coche/{id}")
     suspend fun eliminarCoche(@Path("id") id: Long)
+    @GET("cliente")
+    suspend fun getClientes(): List<ClienteDto>
+
+    // AÑADE ESTOS DOS:
+    @GET("marca")
+    suspend fun getMarcas(): List<MarcaDto>
+
+    @GET("matricula")
+    suspend fun getMatriculas(): List<MatriculaDto>
+
+    // Simplificamos la llamada de coches (ya no necesitamos el _expand obligatoriamente)
+    @GET("coche")
+    suspend fun getCoches(): List<CocheDto>
 }
