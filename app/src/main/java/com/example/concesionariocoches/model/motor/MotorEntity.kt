@@ -1,4 +1,4 @@
-package model.motor
+package com.example.concesionariocoches.model.motor
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

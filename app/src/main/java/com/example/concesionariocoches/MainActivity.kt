@@ -3,45 +3,31 @@ package com.example.concesionariocoches
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.concesionariocoches.api.RetrofitClient
+import com.example.concesionariocoches.data.database.AppDatabase
+import com.example.concesionariocoches.repository.CocheRepository
+import com.example.concesionariocoches.screens.CocheScreen
 import com.example.concesionariocoches.ui.theme.ConcesionarioCochesTheme
+import com.example.concesionariocoches.viewmodel.CocheViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Inicialización de dependencias (Manual DI)
+        val database = AppDatabase.getDatabase(this)
+        val repository = CocheRepository(RetrofitClient.instance, database.concesionarioDao())
+        val viewModel = CocheViewModel.Factory(repository).create(CocheViewModel::class.java)
+
         setContent {
             ConcesionarioCochesTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    CocheScreen(viewModel = viewModel)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ConcesionarioCochesTheme {
-        Greeting("Android")
     }
 }

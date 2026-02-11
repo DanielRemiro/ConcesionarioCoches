@@ -1,6 +1,6 @@
-package api
+package com.example.concesionariocoches.api
 
-import api.dto.CocheDto
+import com.example.concesionariocoches.api.dto.CocheDto
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET

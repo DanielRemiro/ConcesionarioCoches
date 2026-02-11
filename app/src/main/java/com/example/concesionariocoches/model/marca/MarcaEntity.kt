@@ -1,4 +1,4 @@
-package model.marca
+package com.example.concesionariocoches.model.marca
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

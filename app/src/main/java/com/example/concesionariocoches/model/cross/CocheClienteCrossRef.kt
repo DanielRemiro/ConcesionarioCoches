@@ -1,9 +1,9 @@
-package model.cross
+package com.example.concesionariocoches.model.cross
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
-import model.cliente.ClienteEntity
-import model.coche.CocheEntity
+import com.example.concesionariocoches.model.cliente.ClienteEntity
+import com.example.concesionariocoches.model.coche.CocheEntity
 
 @Entity(
     primaryKeys = ["cocheId", "clienteId"],

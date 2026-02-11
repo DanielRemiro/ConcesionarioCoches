@@ -1,4 +1,4 @@
-package model.cliente
+package com.example.concesionariocoches.model.cliente
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -1,11 +1,11 @@
-package model.coche
+package com.example.concesionariocoches.model.coche
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import model.marca.MarcaEntity
-import model.motor.MotorEntity
+import com.example.concesionariocoches.model.marca.MarcaEntity
+import com.example.concesionariocoches.model.motor.MotorEntity
 
 @Entity(
     tableName = "coche",

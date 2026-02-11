@@ -1,4 +1,4 @@
-package api.dto
+package com.example.concesionariocoches.api.dto
 
 data class MarcaDto(
     val id: Long,

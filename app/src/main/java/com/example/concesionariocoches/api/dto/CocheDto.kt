@@ -1,4 +1,4 @@
-package api.dto
+package com.example.concesionariocoches.api.dto
 
 import com.google.gson.annotations.SerializedName
 

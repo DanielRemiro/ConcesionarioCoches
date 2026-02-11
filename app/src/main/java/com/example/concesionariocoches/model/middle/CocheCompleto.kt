@@ -1,10 +1,10 @@
-package model.middle
+package com.example.concesionariocoches.model.middle
 
 import androidx.room.Embedded
 import androidx.room.Relation
-import model.coche.CocheEntity
-import model.marca.MarcaEntity
-import model.motor.MotorEntity
+import com.example.concesionariocoches.model.coche.CocheEntity
+import com.example.concesionariocoches.model.marca.MarcaEntity
+import com.example.concesionariocoches.model.motor.MotorEntity
 
 data class CocheCompleto(
     @Embedded val coche: CocheEntity,
