@@ -9,27 +9,25 @@ data class CocheDto(
     @SerializedName("modelo")
     val modelo: String,
 
-    @SerializedName("color")
-    val color: String,
-
     @SerializedName("precio")
     val precio: Double,
 
-    @SerializedName("descripcion")
-    val descripcion: String,
-
+    // --- Claves foráneas (Lo que viene en tu JSON plano) ---
     @SerializedName("marcaId")
     val marcaId: Long,
 
-    @SerializedName("motorId")
-    val motorId: Long,
+    @SerializedName("matriculaId")
+    val matriculaId: Long,
 
     @SerializedName("clientesIds")
-    val clientesIds: List<Long> = emptyList(),
+    val clientesIds: List<Long>? = emptyList(),
 
+    // --- Objetos anidados (Opcionales) ---
+    // Estos se llenarán solo si tu API usa ?_expand=marca o similar.
+    // El Repository los usaba para guardar la marca/matrícula automáticamente.
     @SerializedName("marca")
     val marca: MarcaDto? = null,
 
-    @SerializedName("motor")
-    val motor: MotorDto? = null
+    @SerializedName("matricula")
+    val matricula: MatriculaDto? = null
 )

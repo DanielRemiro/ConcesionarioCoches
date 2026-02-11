@@ -1,6 +1,5 @@
 package com.example.concesionariocoches.screens
 
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -69,9 +68,27 @@ fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit) {
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "${cocheCompleto.marca.nombre} ${cocheCompleto.coche.modelo}", style = MaterialTheme.typography.titleLarge)
-            Text(text = "Motor: ${cocheCompleto.motor.combustible} - ${cocheCompleto.motor.potencia}")
-            Text(text = "Precio: ${cocheCompleto.coche.precio} €", color = Color.Green)
+            Text(
+                text = "${cocheCompleto.marca.nombre} ${cocheCompleto.coche.modelo}",
+                style = MaterialTheme.typography.titleLarge
+            )
+            // CAMBIO: Ahora mostramos Matrícula en lugar de Motor
+            Text(text = "Matrícula: ${cocheCompleto.matricula.numero}", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "Fecha: ${cocheCompleto.matricula.fechaMatriculacion}", style = MaterialTheme.typography.bodySmall)
+
+            Text(
+                text = "Precio: ${cocheCompleto.coche.precio} €",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            // Mostrar clientes interesados si existen
+            if (cocheCompleto.clientesInteresados.isNotEmpty()) {
+                Text(
+                    text = "Interesados: ${cocheCompleto.clientesInteresados.joinToString { it.nombre }}",
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
 
             IconButton(onClick = onDelete, modifier = Modifier.align(Alignment.End)) {
                 Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Red)
@@ -82,23 +99,20 @@ fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit) {
 
 @Composable
 fun AddCocheDialog(onDismiss: () -> Unit, onConfirm: (CocheDto) -> Unit) {
-    // Ejemplo simplificado. En una app real usarías TextField para cada campo.
-    // Aquí hardcodeamos valores para simular la creación según los DTOs que tienes.
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Nuevo Coche") },
-        text = { Text("¿Crear un coche de prueba (Ford Fiesta)?") },
+        text = { Text("¿Crear un coche de prueba (Porsche 911)?") },
         confirmButton = {
             Button(onClick = {
+                // CAMBIO: Ajustado a la nueva estructura del CocheDto
                 val nuevo = CocheDto(
-                    id = 0, // La API o la BD deberían generar el ID real
-                    modelo = "Fiesta",
-                    color = "Azul",
-                    precio = 15000.0,
-                    descripcion = "Nuevo modelo",
-                    marcaId = 1, // Asumiendo que existen
-                    motorId = 1,
-                    // Deberías rellenar marca/motor completos si la API lo requiere para crear las entidades hijas
+                    id = (21..1000).random().toLong(), // ID temporal
+                    modelo = "911 Carrera",
+                    precio = 145000.0,
+                    marcaId = 1,      // ID de Porsche según tu JSON
+                    matriculaId = 1,  // Debe ser un ID de matrícula existente o manejarse en backend
+                    clientesIds = emptyList()
                 )
                 onConfirm(nuevo)
             }) {

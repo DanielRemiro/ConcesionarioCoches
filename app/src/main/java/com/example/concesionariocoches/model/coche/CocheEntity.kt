@@ -5,7 +5,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.example.concesionariocoches.model.marca.MarcaEntity
-import com.example.concesionariocoches.model.motor.MotorEntity
+import com.example.concesionariocoches.model.matricula.MatriculaEntity
 
 @Entity(
     tableName = "coche",
@@ -13,23 +13,16 @@ import com.example.concesionariocoches.model.motor.MotorEntity
         ForeignKey(
             entity = MarcaEntity::class,
             parentColumns = ["marcaId"],
-            childColumns = ["marcaId"],
-            onDelete = ForeignKey.CASCADE // Si borras Toyota, se borran sus Corollas (Correcto)
+            childColumns = ["marcaId"]
         ),
-        ForeignKey(
-            entity = MotorEntity::class,
-            parentColumns = ["motorId"],
-            childColumns = ["motorId"],
-            onDelete = ForeignKey.CASCADE // Si borras el Motor, se borra el Coche (Correcto)
-        )
+        ForeignKey(entity = MatriculaEntity::class, parentColumns = ["matriculaId"], childColumns = ["matriculaId"])
     ],
-    indices = [Index("marcaId"), Index("motorId")]
+    indices = [Index("marcaId"), Index("matriculaId")] // Buena práctica para rendimiento
 )
 data class CocheEntity(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    @PrimaryKey(autoGenerate = true) val cocheId: Long = 0,
     val modelo: String,
     val precio: Double,
-    val descripcion: String,
-    val marcaId: Long, // FK 1:N
-    val motorId: Long  // FK 1:1
+    val marcaId: Long,     // Relación 1:N con Marca
+    val matriculaId: Long  // Relación 1:1 con Matrícula
 )

@@ -9,20 +9,16 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface ConcesionarioApi {
-    // GET: Obtener todos los coches (con expand para traer relaciones si el server lo soporta, o manual)
-    @GET("coche")
+    // MODIFICADO: Añadimos _expand para evitar error de Foreign Key en Room
+    @GET("coche?_expand=marca&_expand=matricula")
     suspend fun getCoches(): List<CocheDto>
-    // Nota: CocheDto es una clase de datos simple para parsear el JSON recibido
 
-    // POST: Crear nuevo coche en la nube
     @POST("coche")
     suspend fun crearCoche(@Body coche: CocheDto): CocheDto
 
-    // PUT: Actualizar
     @PUT("coche/{id}")
     suspend fun actualizarCoche(@Path("id") id: Long, @Body coche: CocheDto): CocheDto
 
-    // DELETE: Borrar
     @DELETE("coche/{id}")
     suspend fun eliminarCoche(@Path("id") id: Long)
 }

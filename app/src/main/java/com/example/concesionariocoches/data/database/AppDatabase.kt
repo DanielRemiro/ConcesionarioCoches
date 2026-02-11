@@ -8,18 +8,19 @@ import com.example.concesionariocoches.data.dao.ConcesionarioDao
 import com.example.concesionariocoches.model.cliente.ClienteEntity
 import com.example.concesionariocoches.model.coche.CocheEntity
 import com.example.concesionariocoches.model.cross.CocheClienteCrossRef
+
 import com.example.concesionariocoches.model.marca.MarcaEntity
-import com.example.concesionariocoches.model.motor.MotorEntity
+import com.example.concesionariocoches.model.matricula.MatriculaEntity // Asegúrate de importar la nueva entidad
 
 @Database(
     entities = [
         CocheEntity::class,
         MarcaEntity::class,
-        MotorEntity::class,
+        MatriculaEntity::class, // Hemos cambiado Motor por Matricula
         ClienteEntity::class,
         CocheClienteCrossRef::class
     ],
-    version = 1,
+    version = 2, // Subimos la versión porque ha cambiado el esquema
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -35,7 +36,12 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "concesionario_db"
-                ).build().also { INSTANCE = it }
+                )
+                    // IMPORTANTE: Esto permite borrar la BD antigua y crear la nueva
+                    // si cambias las tablas (útil en desarrollo para evitar crashes)
+                    .fallbackToDestructiveMigration()
+                    .build()
+                    .also { INSTANCE = it }
             }
         }
     }

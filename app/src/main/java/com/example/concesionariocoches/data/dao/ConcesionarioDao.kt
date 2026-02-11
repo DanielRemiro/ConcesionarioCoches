@@ -1,11 +1,10 @@
 package com.example.concesionariocoches.data.dao
 
-
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 import com.example.concesionariocoches.model.coche.CocheEntity
 import com.example.concesionariocoches.model.marca.MarcaEntity
-import com.example.concesionariocoches.model.motor.MotorEntity
+import com.example.concesionariocoches.model.matricula.MatriculaEntity // Cambiado Motor por Matricula
 import com.example.concesionariocoches.model.cliente.ClienteEntity
 import com.example.concesionariocoches.model.cross.CocheClienteCrossRef
 import com.example.concesionariocoches.model.middle.CocheCompleto
@@ -14,19 +13,22 @@ import com.example.concesionariocoches.model.middle.CocheCompleto
 interface ConcesionarioDao {
 
     // --- OPERACIONES DE LECTURA (Relaciones) ---
+    // Esta función requiere que la clase CocheCompleto esté actualizada (ver abajo)
     @Transaction
     @Query("SELECT * FROM coche")
     fun getCochesCompletos(): Flow<List<CocheCompleto>>
 
-    @Query("SELECT * FROM coche WHERE id = :id")
+    // IMPORTANTE: Asegúrate de que la columna coincida con tu @PrimaryKey en CocheEntity
+    @Query("SELECT * FROM coche WHERE cocheId = :id")
     suspend fun getCocheById(id: Long): CocheEntity?
 
     // --- CRUD BÁSICO ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMarca(marca: MarcaEntity): Long
 
+    // NUEVO: Insertar Matrícula
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertMotor(motor: MotorEntity): Long
+    suspend fun insertMatricula(matricula: MatriculaEntity): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCoche(coche: CocheEntity): Long
@@ -43,7 +45,7 @@ interface ConcesionarioDao {
     @Delete
     suspend fun deleteCoche(coche: CocheEntity)
 
-    // Borrado en cascada para limpiar datos antiguos al refrescar de la API
+    // Borrado en cascada
     @Query("DELETE FROM coche")
     suspend fun deleteAllCoches()
 }

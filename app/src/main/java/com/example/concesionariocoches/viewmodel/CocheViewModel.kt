@@ -12,12 +12,19 @@ import com.example.concesionariocoches.repository.CocheRepository
 
 class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
 
-    // Estado observable por la UI
+    // Estado observable por la UI (CocheCompleto incluye Marca, Matricula y Clientes)
     val cochesState = repository.coches
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList()
+        )
 
     init {
-        // Cargar datos al iniciar
+        refresh()
+    }
+
+    fun refresh() {
         viewModelScope.launch {
             repository.refreshCoches()
         }
@@ -25,17 +32,20 @@ class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
 
     fun agregarCoche(dto: CocheDto) {
         viewModelScope.launch {
+            // El repositorio se encarga de desglosar el DTO en las 3 tablas
             repository.crearCoche(dto)
         }
     }
 
     fun eliminarCoche(coche: CocheEntity) {
         viewModelScope.launch {
+            // Al borrar el coche, la tabla intermedia (CrossRef) se limpia sola
+            // gracias al onDelete = CASCADE que pusimos en la entidad.
             repository.borrarCoche(coche)
         }
     }
 
-    // Factory para inyectar dependencias manualmente
+    // Factory para el ViewModel
     class Factory(private val repository: CocheRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(CocheViewModel::class.java)) {
