@@ -50,6 +50,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.room.common.jvm)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -57,4 +58,9 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+    // RETROFIT (Para hacer las llamadas a la API)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+
+    // CONVERTER GSON (Para transformar el JSON a tus objetos Kotlin automáticamente)
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }
