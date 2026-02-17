@@ -5,14 +5,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh // NUEVO IMPORT
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.viewmodel.CocheViewModel
@@ -33,7 +30,6 @@ fun CocheScreen(viewModel: CocheViewModel) {
             TopAppBar(
                 title = { Text("Gestión de Coches") },
                 actions = {
-                    // BOTÓN DE ACTUALIZACIÓN / SINCRONIZACIÓN
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
@@ -105,45 +101,3 @@ fun CocheScreen(viewModel: CocheViewModel) {
     }
 }
 
-@Composable
-fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit, onUpdate: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "${cocheCompleto.marca.nombre} ${cocheCompleto.coche.modelo}",
-                style = MaterialTheme.typography.titleLarge
-            )
-            Text(text = "Matrícula: ${cocheCompleto.matricula.numero}", style = MaterialTheme.typography.bodyMedium)
-
-            Text(
-                text = "Precio: ${cocheCompleto.coche.precio} €",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            if (cocheCompleto.clientesInteresados.isNotEmpty()) {
-                Text(
-                    text = "Interesados: ${cocheCompleto.clientesInteresados.joinToString { it.nombre }}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.Gray
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                IconButton(onClick = onUpdate) {
-                    Icon(Icons.Default.Create, contentDescription = "Editar", tint = Color(0xFFFBC02D))
-                }
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Red)
-                }
-            }
-        }
-    }
-}

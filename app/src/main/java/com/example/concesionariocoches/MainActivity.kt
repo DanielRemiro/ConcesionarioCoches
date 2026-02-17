@@ -14,6 +14,7 @@ import com.example.concesionariocoches.repository.CocheRepository
 import com.example.concesionariocoches.screens.CocheScreen
 import com.example.concesionariocoches.ui.theme.ConcesionarioCochesTheme
 import com.example.concesionariocoches.viewmodel.CocheViewModel
+import com.example.concesionariocoches.viewmodel.Factory
 
 class MainActivity : ComponentActivity() {
 
@@ -26,7 +27,7 @@ class MainActivity : ComponentActivity() {
         val repository = CocheRepository(api, database.concesionarioDao())
 
         val viewModel: CocheViewModel by viewModels {
-            CocheViewModel.Factory(repository)
+            Factory(repository)
         }
 
         setContent {

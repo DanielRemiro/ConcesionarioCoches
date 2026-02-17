@@ -50,14 +50,4 @@ class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
         }
     }
 
-
-    class Factory(private val repository: CocheRepository) : ViewModelProvider.Factory {
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            if (modelClass.isAssignableFrom(CocheViewModel::class.java)) {
-                @Suppress("UNCHECKED_CAST")
-                return CocheViewModel(repository) as T
-            }
-            throw IllegalArgumentException("Unknown ViewModel class")
-        }
-    }
 }
