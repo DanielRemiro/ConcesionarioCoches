@@ -20,6 +20,8 @@ class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
             initialValue = emptyList()
         )
 
+    val marcasState = repository.todasLasMarcas.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val clientesState = repository.todosLosClientes.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
     init {
         refresh()
     }

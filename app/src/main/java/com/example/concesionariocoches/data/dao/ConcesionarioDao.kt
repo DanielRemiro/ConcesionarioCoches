@@ -46,4 +46,8 @@ interface ConcesionarioDao {
 
     @Query("DELETE FROM coche_cliente_cross_ref WHERE cocheId = :cocheId")
     suspend fun deleteCocheClienteRefs(cocheId: Long)
+    @Query("SELECT * FROM cliente")
+    fun getAllClientes(): Flow<List<ClienteEntity>>
+    @Query("SELECT * FROM marca")
+    fun getAllMarcas(): Flow<List<MarcaEntity>>
 }

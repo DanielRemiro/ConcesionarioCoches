@@ -16,7 +16,9 @@ class CocheRepository(
     private val dao: ConcesionarioDao
 ) {
     val coches: Flow<List<CocheCompleto>> = dao.getCochesCompletos()
-
+    val clientes: Flow<List<ClienteEntity>> = dao.getAllClientes()
+    val todasLasMarcas: Flow<List<MarcaEntity>> = dao.getAllMarcas()
+    val todosLosClientes: Flow<List<ClienteEntity>> = dao.getAllClientes()
 
     suspend fun refreshCoches() {
         try {

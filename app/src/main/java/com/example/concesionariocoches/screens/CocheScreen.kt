@@ -17,28 +17,50 @@ import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.viewmodel.CocheViewModel
 import com.example.concesionariocoches.screens.functions.*
 
+// ... (mismos imports)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CocheScreen(viewModel: CocheViewModel) {
     val coches by viewModel.cochesState.collectAsState()
+    val marcas by viewModel.marcasState.collectAsState()
+    val clientes by viewModel.clientesState.collectAsState()
+
     var showAddDialog by remember { mutableStateOf(false) }
     var cocheAEditar by remember { mutableStateOf<CocheCompleto?>(null) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Gestión de Coches") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("Gestión de Concesionario") },
+                // Esto asegura que la barra superior sea sólida y no transparente
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Añadir Coche")
             }
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        // USAMOS EL PADDING DEL SCAFFOLD Y FILLMAXSIZE
+        Column(
+            modifier = Modifier
+                .padding(padding)
+                .fillMaxSize()
+        ) {
             if (coches.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No hay coches disponibles.")
                 }
             } else {
-                LazyColumn {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 80.dp) // Espacio extra abajo para el FAB
+                ) {
                     items(coches) { cocheCompleto ->
                         CocheItem(
                             cocheCompleto = cocheCompleto,
@@ -50,8 +72,11 @@ fun CocheScreen(viewModel: CocheViewModel) {
             }
         }
 
+        // Diálogos (están fuera del flujo normal, no se superponen)
         if (showAddDialog) {
             AnadirCoche(
+                marcas = marcas,
+                clientes = clientes,
                 onDismiss = { showAddDialog = false },
                 onConfirm = { nuevoDto, nuevaMatricula ->
                     viewModel.agregarCoche(nuevoDto, nuevaMatricula)
@@ -63,6 +88,8 @@ fun CocheScreen(viewModel: CocheViewModel) {
         cocheAEditar?.let { coche ->
             EditarCoche(
                 cocheCompleto = coche,
+                marcasDisponibles = marcas,
+                clientesDisponibles = clientes,
                 onDismiss = { cocheAEditar = null },
                 onConfirm = { actualizadoDto, matriculaEditada ->
                     viewModel.actualizarCoche(actualizadoDto, matriculaEditada)
@@ -72,7 +99,6 @@ fun CocheScreen(viewModel: CocheViewModel) {
         }
     }
 }
-
 @Composable
 fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit, onUpdate: () -> Unit) {
     Card(
@@ -97,7 +123,8 @@ fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit, onUpdate: () -
             if (cocheCompleto.clientesInteresados.isNotEmpty()) {
                 Text(
                     text = "Interesados: ${cocheCompleto.clientesInteresados.joinToString { it.nombre }}",
-                    style = MaterialTheme.typography.labelSmall
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray
                 )
             }
 
