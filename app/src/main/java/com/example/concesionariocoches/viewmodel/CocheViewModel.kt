@@ -45,6 +45,12 @@ class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
         }
     }
 
+    fun actualizarCoche(dto: CocheDto) {
+        viewModelScope.launch {
+            repository.actualizarCoche(dto)
+        }
+    }
+
     // Factory para el ViewModel
     class Factory(private val repository: CocheRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

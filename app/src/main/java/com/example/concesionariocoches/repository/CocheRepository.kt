@@ -152,4 +152,31 @@ class CocheRepository(
         // DELETE en BD
         dao.deleteCoche(coche)
     }
+    suspend fun actualizarCoche(cocheDto: CocheDto) {
+        try {
+            // 1. Actualización en la API
+            api.actualizarCoche(cocheDto.id, cocheDto)
+
+            // 2. Mapear DTO a Entity para Room
+            val cocheEntity = CocheEntity(
+                cocheId = cocheDto.id,
+                modelo = cocheDto.modelo,
+                precio = cocheDto.precio,
+                marcaId = cocheDto.marcaId,
+                matriculaId = cocheDto.matriculaId
+            )
+
+            // 3. Actualizar en la BD local
+            // Usamos updateCoche que ya definiste en el DAO
+            dao.updateCoche(cocheEntity)
+
+            // 4. Opcional: Si el DTO trae nuevos clientes, actualizamos la tabla intermedia
+            cocheDto.clientesIds?.forEach { clienteId ->
+                dao.insertCocheClienteRef(CocheClienteCrossRef(cocheDto.id, clienteId))
+            }
+
+        } catch (e: Exception) {
+            android.util.Log.e("API_ERROR", "Error al actualizar: ${e.message}")
+        }
+    }
 }
