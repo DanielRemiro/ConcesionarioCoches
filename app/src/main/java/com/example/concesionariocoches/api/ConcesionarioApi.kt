@@ -1,7 +1,7 @@
 package com.example.concesionariocoches.api
 
 import com.example.concesionariocoches.api.dto.CocheDto
-import com.example.concesionariocoches.api.dto.ClienteDto // Asegúrate de importar esto
+import com.example.concesionariocoches.api.dto.ClienteDto
 import com.example.concesionariocoches.api.dto.MarcaDto
 import com.example.concesionariocoches.api.dto.MatriculaDto
 import retrofit2.http.Body

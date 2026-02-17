@@ -14,6 +14,10 @@ import com.example.concesionariocoches.model.marca.MarcaEntity
 import com.example.concesionariocoches.model.matricula.MatriculaEntity
 import com.example.concesionariocoches.model.middle.CocheCompleto
 
+/**
+ * COMPONENTE DE EDICIÓN: Recibe el objeto 'CocheCompleto' con los datos actuales
+ * y las listas de opciones disponibles (marcas y clientes).
+ */
 @Composable
 fun EditarCoche(
     cocheCompleto: CocheCompleto,
@@ -22,9 +26,15 @@ fun EditarCoche(
     onDismiss: () -> Unit,
     onConfirm: (CocheDto, MatriculaEntity) -> Unit
 ) {
+    /** * INICIALIZACIÓN CON DATOS EXISTENTES:
+     * A diferencia de 'AnadirCoche', aquí los estados se inicializan con los
+     * valores que ya tiene el coche en la base de datos.
+     */
     var modelo by remember { mutableStateOf(cocheCompleto.coche.modelo) }
     var precio by remember { mutableStateOf(cocheCompleto.coche.precio.toString()) }
     var marcaSeleccionadaId by remember { mutableStateOf(cocheCompleto.coche.marcaId) }
+
+    // Convertimos la lista de clientes interesados en un Set de IDs para facilitar la gestión
     var clientesSeleccionadosIds by remember {
         mutableStateOf(cocheCompleto.clientesInteresados.map { it.id }.toSet())
     }
@@ -33,13 +43,14 @@ fun EditarCoche(
         onDismissRequest = onDismiss,
         title = { Text("Editar Vehículo") },
         text = {
-            // EL COLUMN DEBE TENER SCROLL PARA NO SUPERPONERSE
+            // Contenedor con scroll para asegurar que todos los campos sean accesibles
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Campos de texto para modificar modelo y precio
                 OutlinedTextField(
                     value = modelo,
                     onValueChange = { modelo = it },
@@ -55,6 +66,9 @@ fun EditarCoche(
 
                 HorizontalDivider()
 
+                /** * CAMBIO DE MARCA (Relación 1:N):
+                 * Permite reasignar el coche a una marca diferente de la lista disponible.
+                 */
                 Text("Seleccionar Marca", style = MaterialTheme.typography.titleSmall)
                 marcasDisponibles.forEach { marca ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -68,6 +82,9 @@ fun EditarCoche(
 
                 HorizontalDivider()
 
+                /** * GESTIÓN DE INTERESADOS (Relación N:M):
+                 * El usuario puede añadir o quitar clientes interesados de forma dinámica.
+                 */
                 Text("Clientes Interesados", style = MaterialTheme.typography.titleSmall)
                 clientesDisponibles.forEach { cliente ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -87,16 +104,20 @@ fun EditarCoche(
             }
         },
         confirmButton = {
+            /** * GUARDADO DE CAMBIOS:
+             * Al pulsar "Guardar", se construye un nuevo 'CocheDto' con la misma ID
+             * original pero con los datos modificados por el usuario.
+             */
             Button(onClick = {
                 val dto = CocheDto(
-                    id = cocheCompleto.coche.cocheId,
+                    id = cocheCompleto.coche.cocheId, // Mantenemos la ID original
                     modelo = modelo,
                     precio = precio.toDoubleOrNull() ?: cocheCompleto.coche.precio,
                     marcaId = marcaSeleccionadaId,
                     matriculaId = cocheCompleto.coche.matriculaId,
                     clientesIds = clientesSeleccionadosIds.toList()
                 )
-                onConfirm(dto, cocheCompleto.matricula)
+                onConfirm(dto, cocheCompleto.matricula) // Ejecuta la actualización en el Repositorio
             }) { Text("Guardar") }
         },
         dismissButton = {

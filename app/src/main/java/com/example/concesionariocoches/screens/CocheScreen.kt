@@ -15,25 +15,38 @@ import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.viewmodel.CocheViewModel
 import com.example.concesionariocoches.screens.functions.*
 
+/**
+ * PANTALLA PRINCIPAL: Coordina la visualización de datos y la interacción del usuario.
+ * @param viewModel El cerebro de la pantalla que provee los datos y procesa las acciones.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CocheScreen(viewModel: CocheViewModel) {
+    /** * OBSERVACIÓN DE ESTADOS (Patrón Observer):
+     * Convertimos los flujos del ViewModel en estados de Compose.
+     * Si los datos cambian en la base de datos, esta pantalla se "entera" y se redibuja sola.
+     */
     val coches by viewModel.cochesState.collectAsState()
     val marcas by viewModel.marcasState.collectAsState()
     val clientes by viewModel.clientesState.collectAsState()
 
+    // Estados para controlar la visibilidad de los diálogos (Modales)
     var showAddDialog by remember { mutableStateOf(false) }
     var cocheAEditar by remember { mutableStateOf<CocheCompleto?>(null) }
 
+    /** * ESTRUCTURA SCAFFOLD:
+     * Proporciona el diseño estándar de Android (Barra superior, Botón flotante y Contenido).
+     */
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Gestión de Coches") },
                 actions = {
+                    // Acción de refresco: Sincroniza los datos locales con la API externa
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Sincronizar con API",
+                            contentDescription = "Sincronizar",
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
@@ -44,6 +57,7 @@ fun CocheScreen(viewModel: CocheViewModel) {
             )
         },
         floatingActionButton = {
+            // FAB: Botón flotante para abrir el formulario de creación
             FloatingActionButton(onClick = { showAddDialog = true }) {
                 Icon(Icons.Default.Add, contentDescription = "Añadir Coche")
             }
@@ -54,18 +68,26 @@ fun CocheScreen(viewModel: CocheViewModel) {
                 .padding(padding)
                 .fillMaxSize()
         ) {
+            /** * LÓGICA DE CONTENIDO VACÍO:
+             * Si no hay datos, mostramos un mensaje de ayuda al usuario.
+             */
             if (coches.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text("No hay coches. Pulsa el botón de arriba para sincronizar.")
                 }
             } else {
+                /** * LISTADO EFICIENTE (LazyColumn):
+                 * Solo dibuja los elementos que son visibles en pantalla,
+                 * optimizando el uso de memoria y batería.
+                 */
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 80.dp)
+                    contentPadding = PaddingValues(bottom = 80.dp) // Espacio para que el FAB no tape el último item
                 ) {
                     items(coches) { cocheCompleto ->
                         CocheItem(
                             cocheCompleto = cocheCompleto,
+                            // Conectamos las acciones del Item directamente con el ViewModel
                             onDelete = { viewModel.eliminarCoche(cocheCompleto) },
                             onUpdate = { cocheAEditar = cocheCompleto }
                         )
@@ -74,6 +96,11 @@ fun CocheScreen(viewModel: CocheViewModel) {
             }
         }
 
+        /** * GESTIÓN DE DIÁLOGOS (UI Condicional):
+         * Estos componentes solo se instancian si el estado correspondiente es verdadero.
+         */
+
+        // 1. Diálogo para Añadir
         if (showAddDialog) {
             AnadirCoche(
                 marcas = marcas,
@@ -86,6 +113,7 @@ fun CocheScreen(viewModel: CocheViewModel) {
             )
         }
 
+        // 2. Diálogo para Editar (se activa al seleccionar un coche específico)
         cocheAEditar?.let { coche ->
             EditarCoche(
                 cocheCompleto = coche,

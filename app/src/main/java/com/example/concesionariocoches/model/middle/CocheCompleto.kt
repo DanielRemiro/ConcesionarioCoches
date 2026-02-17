@@ -13,21 +13,21 @@ import com.example.concesionariocoches.model.matricula.MatriculaEntity
 data class CocheCompleto(
     @Embedded val coche: CocheEntity,
 
-    // Relación 1:1 con Marca (Un coche tiene una marca)
+    // Relación 1:1 con Marca
     @Relation(
         parentColumn = "marcaId",
         entityColumn = "marcaId"
     )
     val marca: MarcaEntity,
 
-    // Relación 1:1 con Matrícula (Un coche tiene una matrícula)
+    // Relación 1:1 con Matrícula
     @Relation(
         parentColumn = "matriculaId",
         entityColumn = "matriculaId"
     )
     val matricula: MatriculaEntity,
 
-    // Relación N:M con Clientes (Un coche interesa a varios clientes)
+    // Relación N:M con Clientes
     @Relation(
         parentColumn = "cocheId",
         entityColumn = "clienteId",
