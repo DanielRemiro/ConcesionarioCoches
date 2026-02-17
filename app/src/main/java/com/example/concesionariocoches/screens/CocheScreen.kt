@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.concesionariocoches.model.middle.CocheCompleto
-import com.example.concesionariocoches.api.dto.CocheDto
 import com.example.concesionariocoches.viewmodel.CocheViewModel
+import com.example.concesionariocoches.screens.functions.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +54,7 @@ fun CocheScreen(viewModel: CocheViewModel) {
 
         // Diálogo para Añadir
         if (showAddDialog) {
-            AddCocheDialog(
+            AnadirCoche(
                 onDismiss = { showAddDialog = false },
                 onConfirm = { nuevo ->
                     viewModel.agregarCoche(nuevo)
@@ -65,7 +65,7 @@ fun CocheScreen(viewModel: CocheViewModel) {
 
         // Diálogo para Editar (Nuevo)
         cocheAEditar?.let { coche ->
-            EditCocheDialog(
+            EditarCoche (
                 cocheCompleto = coche,
                 onDismiss = { cocheAEditar = null },
                 onConfirm = { cocheActualizado ->
@@ -119,128 +119,4 @@ fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit, onUpdate: () -
             }
         }
     }
-}
-
-
-@Composable
-fun AddCocheDialog(onDismiss: () -> Unit, onConfirm: (CocheDto) -> Unit) {
-    // Estados para los campos del formulario
-    var modelo by remember { mutableStateOf("") }
-    var precio by remember { mutableStateOf("") }
-    var marcaId by remember { mutableStateOf("") }
-    var matriculaId by remember { mutableStateOf("") }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Añadir Nuevo Coche") },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = modelo,
-                    onValueChange = { modelo = it },
-                    label = { Text("Modelo (ej: 911 Carrera)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = precio,
-                    onValueChange = { precio = it },
-                    label = { Text("Precio (€)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = marcaId,
-                    onValueChange = { marcaId = it },
-                    label = { Text("ID de Marca (Existente)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = matriculaId,
-                    onValueChange = { matriculaId = it },
-                    label = { Text("ID de Matrícula (Existente)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text(
-                    text = "Nota: Asegúrate de que los IDs de marca y matrícula existan en la base de datos.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    // Validamos mínimamente que los campos no estén vacíos
-                    if (modelo.isNotBlank() && precio.isNotBlank()) {
-                        val nuevoCoche = CocheDto(
-                            id = (100..9999).random().toLong(), // ID temporal o generado por API
-                            modelo = modelo,
-                            precio = precio.toDoubleOrNull() ?: 0.0,
-                            marcaId = marcaId.toLongOrNull() ?: 1L,
-                            matriculaId = matriculaId.toLongOrNull() ?: 1L,
-                            clientesIds = emptyList() // Inicialmente sin clientes
-                        )
-                        onConfirm(nuevoCoche)
-                    }
-                }
-            ) {
-                Text("Crear Coche")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
-    )
-}
-@Composable
-fun EditCocheDialog(
-    cocheCompleto: CocheCompleto,
-    onDismiss: () -> Unit,
-    onConfirm: (CocheDto) -> Unit
-) {
-    var modelo by remember { mutableStateOf(cocheCompleto.coche.modelo) }
-    var precio by remember { mutableStateOf(cocheCompleto.coche.precio.toString()) }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Editar Coche") },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = modelo,
-                    onValueChange = { modelo = it },
-                    label = { Text("Modelo") }
-                )
-                OutlinedTextField(
-                    value = precio,
-                    onValueChange = { precio = it },
-                    label = { Text("Precio (€)") }
-                )
-                Text(
-                    text = "Marca: ${cocheCompleto.marca.nombre}",
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        },
-        confirmButton = {
-            Button(onClick = {
-                val dto = CocheDto(
-                    id = cocheCompleto.coche.cocheId, // Mantenemos el ID original
-                    modelo = modelo,
-                    precio = precio.toDoubleOrNull() ?: cocheCompleto.coche.precio,
-                    marcaId = cocheCompleto.coche.marcaId,
-                    matriculaId = cocheCompleto.coche.matriculaId,
-                    clientesIds = cocheCompleto.clientesInteresados.map { it.id }
-                )
-                onConfirm(dto)
-            }) {
-                Text("Guardar Cambios")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
-        }
-    )
 }

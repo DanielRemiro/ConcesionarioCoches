@@ -20,15 +20,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // 1. Inicialización de la base de datos y API
         val database = AppDatabase.getDatabase(this)
         val api = RetrofitClient.instance
 
-        // 2. Creación del repositorio
         val repository = CocheRepository(api, database.concesionarioDao())
 
-        // 3. Instanciación del ViewModel usando el Factory
-        // Usamos 'viewModels' con el factory para que el ViewModel sobreviva a cambios de configuración
         val viewModel: CocheViewModel by viewModels {
             CocheViewModel.Factory(repository)
         }
@@ -39,7 +35,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // 4. Inyección del ViewModel en la pantalla principal
                     CocheScreen(viewModel = viewModel)
                 }
             }
