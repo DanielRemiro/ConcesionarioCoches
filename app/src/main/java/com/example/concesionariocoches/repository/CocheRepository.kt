@@ -132,24 +132,32 @@ class CocheRepository(
 
     suspend fun actualizarCocheCompleto(dto: CocheDto, matricula: MatriculaEntity) {
         try {
+            // 1. Intentamos actualizar en el servidor
             api.actualizarCoche(dto.id, dto)
-
+            android.util.Log.d("API_UPDATE", "Actualización en servidor exitosa")
+        } catch (e: Exception) {
+            // Si falla la API (error 404, red, etc.), lo registramos pero NO detenemos el proceso
+            android.util.Log.e("API_UPDATE", "Error al actualizar en API: ${e.message}")
+        } finally {
+            // 2. ESTO SIEMPRE SE EJECUTA: Actualizamos Room localmente
+            // Aquí es donde el nuevo modelo (nombre) se guarda de verdad en el móvil
             dao.insertMatricula(matricula)
-            dao.updateCoche(
-                CocheEntity(
-                    dto.id,
-                    dto.modelo,
-                    dto.precio,
-                    dto.marcaId,
-                    matricula.matriculaId
-                )
-            )
 
+            val cocheLocal = CocheEntity(
+                cocheId = dto.id,
+                modelo = dto.modelo, // Aquí viaja el nuevo nombre
+                precio = dto.precio,
+                marcaId = dto.marcaId,
+                matriculaId = matricula.matriculaId
+            )
+            dao.updateCoche(cocheLocal)
+
+            // Actualizamos también los clientes interesados
             dao.deleteCocheClienteRefs(dto.id)
             dto.clientesIds?.forEach { id ->
                 dao.insertCocheClienteRef(CocheClienteCrossRef(dto.id, id))
             }
-        } catch (e: Exception) {
+            android.util.Log.d("LOCAL_UPDATE", "Base de datos local actualizada")
         }
     }
 
