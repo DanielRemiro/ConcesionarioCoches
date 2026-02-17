@@ -25,17 +25,14 @@ fun AnadirCoche(
     var numMatricula by remember { mutableStateOf("") }
     var fechaMatricula by remember { mutableStateOf("") }
 
-    // Estado para la marca (seleccionamos la primera por defecto si existe)
     var marcaSeleccionadaId by remember { mutableStateOf(marcas.firstOrNull()?.marcaId ?: 0L) }
 
-    // Estado para los clientes interesados
     var clientesSeleccionadosIds by remember { mutableStateOf(setOf<Long>()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Nuevo Coche y Matrícula") },
         text = {
-            // EL COLUMN AHORA TIENE SCROLL PARA EVITAR QUE SE VEA SUPERPUESTO
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -74,7 +71,6 @@ fun AnadirCoche(
 
                 HorizontalDivider()
 
-                // SECCIÓN DE MARCAS (1:N)
                 Text("Seleccionar Marca", style = MaterialTheme.typography.titleSmall)
                 marcas.forEach { marca ->
                     Row(
@@ -91,7 +87,6 @@ fun AnadirCoche(
 
                 HorizontalDivider()
 
-                // SECCIÓN DE CLIENTES (N:M)
                 Text("Clientes Interesados", style = MaterialTheme.typography.titleSmall)
                 if (clientes.isEmpty()) {
                     Text("No hay clientes en la base de datos.", style = MaterialTheme.typography.bodySmall)

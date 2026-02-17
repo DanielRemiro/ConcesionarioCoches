@@ -53,7 +53,7 @@ fun EditarCoche(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                HorizontalDivider() // Cambiado Divider por HorizontalDivider (M3)
+                HorizontalDivider()
 
                 Text("Seleccionar Marca", style = MaterialTheme.typography.titleSmall)
                 marcasDisponibles.forEach { marca ->
