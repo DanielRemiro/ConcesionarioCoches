@@ -129,75 +129,49 @@ class CocheRepository(
         }
     }
 
-    suspend fun borrarCoche(cocheCompleto: CocheCompleto) {
-        try {
-            api.eliminarCoche(cocheCompleto.coche.cocheId)
-        } catch (e: Exception) {
 
-        }
-
-        dao.deleteCoche(cocheCompleto.coche)
-
-        dao.deleteMatricula(cocheCompleto.matricula)
-    }
-    suspend fun actualizarCoche(cocheDto: CocheDto) {
-        try {
-            api.actualizarCoche(cocheDto.id, cocheDto)
-
-            val cocheEntity = CocheEntity(
-                cocheId = cocheDto.id,
-                modelo = cocheDto.modelo,
-                precio = cocheDto.precio,
-                marcaId = cocheDto.marcaId,
-                matriculaId = cocheDto.matriculaId
-            )
-
-            dao.updateCoche(cocheEntity)
-
-            cocheDto.clientesIds?.forEach { clienteId ->
-                dao.insertCocheClienteRef(CocheClienteCrossRef(cocheDto.id, clienteId))
-            }
-
-        } catch (e: Exception) {
-            android.util.Log.e("API_ERROR", "Error al actualizar: ${e.message}")
-        }
-    }
     suspend fun actualizarCocheCompleto(dto: CocheDto, matricula: MatriculaEntity) {
         try {
             api.actualizarCoche(dto.id, dto)
 
             dao.insertMatricula(matricula)
-            dao.updateCoche(CocheEntity(dto.id, dto.modelo, dto.precio, dto.marcaId, matricula.matriculaId))
+            dao.updateCoche(
+                CocheEntity(
+                    dto.id,
+                    dto.modelo,
+                    dto.precio,
+                    dto.marcaId,
+                    matricula.matriculaId
+                )
+            )
 
             dao.deleteCocheClienteRefs(dto.id)
             dto.clientesIds?.forEach { id ->
                 dao.insertCocheClienteRef(CocheClienteCrossRef(dto.id, id))
             }
-        } catch (e: Exception) {  }
+        } catch (e: Exception) {
+        }
     }
-    suspend fun crearCocheCompleto(dto: CocheDto, matricula: MatriculaEntity) {
-        try {
-            val nuevoCoche = api.crearCoche(dto)
 
-            dao.insertMatricula(matricula)
-
-            val cocheEntity = CocheEntity(
-                cocheId = nuevoCoche.id,
-                modelo = dto.modelo,
-                precio = dto.precio,
-                marcaId = dto.marcaId,
-                matriculaId = matricula.matriculaId
-            )
-            dao.insertCoche(cocheEntity)
-
-            dto.clientesIds?.forEach { clienteId ->
-                dao.insertCocheClienteRef(CocheClienteCrossRef(nuevoCoche.id, clienteId))
-            }
-        } catch (e: Exception) {  }
-    }
     suspend fun borrarTodoElCoche(cocheCompleto: CocheCompleto) {
-        api.eliminarCoche(cocheCompleto.coche.cocheId)
-        dao.deleteCoche(cocheCompleto.coche)
-        dao.deleteMatricula(cocheCompleto.matricula)
+        try {
+            // Intentamos borrar en el servidor
+            api.eliminarCoche(cocheCompleto.coche.cocheId)
+            android.util.Log.d("API_DELETE", "Coche eliminado del servidor correctamente.")
+        } catch (e: Exception) {
+            // Si el coche no está en la API (error 404) o no hay internet,
+            // capturamos el error para que la app NO se cierre.
+            android.util.Log.e(
+                "API_DELETE",
+                "Error al borrar en API (posiblemente no existe): ${e.message}"
+            )
+        } finally {
+            // ESTO ES LO MÁS IMPORTANTE:
+            // Pase lo que pase con la API, lo borramos de la base de datos local
+            // para que la interfaz se actualice y el coche desaparezca de la lista.
+            dao.deleteCoche(cocheCompleto.coche)
+            dao.deleteMatricula(cocheCompleto.matricula)
+            android.util.Log.d("LOCAL_DELETE", "Coche eliminado de la base de datos local.")
+        }
     }
 }
