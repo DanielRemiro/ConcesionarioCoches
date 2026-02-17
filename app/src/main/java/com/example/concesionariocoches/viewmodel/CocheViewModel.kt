@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.example.concesionariocoches.api.dto.CocheDto
 import com.example.concesionariocoches.model.coche.CocheEntity
+import com.example.concesionariocoches.model.matricula.MatriculaEntity
+import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.repository.CocheRepository
 
 class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
@@ -29,23 +31,27 @@ class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
         }
     }
 
-    fun agregarCoche(dto: CocheDto) {
+    fun agregarCoche(dto: CocheDto, matricula: MatriculaEntity) {
         viewModelScope.launch {
-            repository.crearCoche(dto)
+            repository.crearCoche(dto, matricula)
         }
     }
 
-    fun eliminarCoche(coche: CocheEntity) {
+    // CocheViewModel.kt
+
+    // Cambiamos CocheEntity por CocheCompleto
+    fun eliminarCoche(cocheCompleto: CocheCompleto) {
         viewModelScope.launch {
-            repository.borrarCoche(coche)
+            repository.borrarTodoElCoche(cocheCompleto)
         }
     }
 
-    fun actualizarCoche(dto: CocheDto) {
+    fun actualizarCoche(dto: CocheDto, matricula: MatriculaEntity) {
         viewModelScope.launch {
-            repository.actualizarCoche(dto)
+            repository.actualizarCocheCompleto(dto, matricula)
         }
     }
+
 
     class Factory(private val repository: CocheRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {

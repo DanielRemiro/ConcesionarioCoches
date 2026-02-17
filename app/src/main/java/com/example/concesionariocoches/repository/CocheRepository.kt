@@ -135,22 +135,40 @@ class CocheRepository(
         }
     }
 
-    suspend fun crearCoche(cocheDto: CocheDto) {
-        // POST a la API
-        val nuevoCoche = api.crearCoche(cocheDto)
-        // Guardar en BD local lo que nos devolvió la API
-        guardarCocheLocalmente(nuevoCoche)
+    suspend fun crearCoche(cocheDto: CocheDto, matriculaNueva: MatriculaEntity) {
+        try {
+            // 1. Enviar a la API (asumiendo que la API maneja la creación de la matrícula o el DTO la incluye)
+            val nuevoCoche = api.crearCoche(cocheDto)
+
+            // 2. Insertar Matrícula Localmente primero (para tener el ID disponible)
+            dao.insertMatricula(matriculaNueva)
+
+            // 3. Guardar el Coche y sus relaciones
+            guardarCocheLocalmente(nuevoCoche)
+
+            // 4. Relaciones N:M con Clientes
+            cocheDto.clientesIds?.forEach { clienteId ->
+                dao.insertCocheClienteRef(CocheClienteCrossRef(nuevoCoche.id, clienteId))
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("API_ERROR", "Error al crear: ${e.message}")
+        }
     }
 
-    suspend fun borrarCoche(coche: CocheEntity) {
-        // DELETE en API
+    suspend fun borrarCoche(cocheCompleto: CocheCompleto) {
         try {
-            api.eliminarCoche(coche.cocheId)
+            // 1. Intentar borrar en la API
+            api.eliminarCoche(cocheCompleto.coche.cocheId)
         } catch (e: Exception) {
             // Log error
         }
-        // DELETE en BD
-        dao.deleteCoche(coche)
+
+        // 2. Borrar el coche de la BD local
+        dao.deleteCoche(cocheCompleto.coche)
+
+        // 3. Borrar la matrícula asociada (esto es lo que falta)
+        // Necesitas añadir una función deleteMatricula en tu DAO
+        dao.deleteMatricula(cocheCompleto.matricula)
     }
     suspend fun actualizarCoche(cocheDto: CocheDto) {
         try {
@@ -178,5 +196,48 @@ class CocheRepository(
         } catch (e: Exception) {
             android.util.Log.e("API_ERROR", "Error al actualizar: ${e.message}")
         }
+    }
+    suspend fun actualizarCocheCompleto(dto: CocheDto, matricula: MatriculaEntity) {
+        try {
+            api.actualizarCoche(dto.id, dto)
+
+            dao.insertMatricula(matricula) // REPLACE actúa como update
+            dao.updateCoche(CocheEntity(dto.id, dto.modelo, dto.precio, dto.marcaId, matricula.matriculaId))
+
+            // Actualizar interesados: limpiar y reinsertar
+            dao.deleteCocheClienteRefs(dto.id)
+            dto.clientesIds?.forEach { id ->
+                dao.insertCocheClienteRef(CocheClienteCrossRef(dto.id, id))
+            }
+        } catch (e: Exception) { /* Manejar error */ }
+    }
+    suspend fun crearCocheCompleto(dto: CocheDto, matricula: MatriculaEntity) {
+        try {
+            // 1. API: Crear coche (opcional enviar a API primero)
+            val nuevoCoche = api.crearCoche(dto)
+
+            // 2. Local: Insertar la Matrícula nueva
+            dao.insertMatricula(matricula)
+
+            // 3. Local: Insertar el Coche vinculando el ID de la matrícula
+            val cocheEntity = CocheEntity(
+                cocheId = nuevoCoche.id,
+                modelo = dto.modelo,
+                precio = dto.precio,
+                marcaId = dto.marcaId,
+                matriculaId = matricula.matriculaId
+            )
+            dao.insertCoche(cocheEntity)
+
+            // 4. Local: Vincular Clientes seleccionados
+            dto.clientesIds?.forEach { clienteId ->
+                dao.insertCocheClienteRef(CocheClienteCrossRef(nuevoCoche.id, clienteId))
+            }
+        } catch (e: Exception) { /* Manejar error */ }
+    }
+    suspend fun borrarTodoElCoche(cocheCompleto: CocheCompleto) {
+        api.eliminarCoche(cocheCompleto.coche.cocheId)
+        dao.deleteCoche(cocheCompleto.coche)
+        dao.deleteMatricula(cocheCompleto.matricula)
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.concesionariocoches.api.dto.CocheDto
 import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.viewmodel.CocheViewModel
 import com.example.concesionariocoches.screens.functions.*
@@ -22,7 +23,6 @@ import com.example.concesionariocoches.screens.functions.*
 fun CocheScreen(viewModel: CocheViewModel) {
     val coches by viewModel.cochesState.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
-    // Estado para el coche que se va a editar
     var cocheAEditar by remember { mutableStateOf<CocheCompleto?>(null) }
 
     Scaffold(
@@ -43,8 +43,8 @@ fun CocheScreen(viewModel: CocheViewModel) {
                     items(coches) { cocheCompleto ->
                         CocheItem(
                             cocheCompleto = cocheCompleto,
-                            onDelete = { viewModel.eliminarCoche(cocheCompleto.coche) },
-                            // Al pulsar editar, guardamos el coche en el estado
+                            // Se pasa el objeto completo para poder borrar también su matrícula
+                            onDelete = { viewModel.eliminarCoche(cocheCompleto) },
                             onUpdate = { cocheAEditar = cocheCompleto }
                         )
                     }
@@ -52,24 +52,25 @@ fun CocheScreen(viewModel: CocheViewModel) {
             }
         }
 
-        // Diálogo para Añadir
+        // --- Diálogo para Añadir ---
         if (showAddDialog) {
             AnadirCoche(
                 onDismiss = { showAddDialog = false },
-                onConfirm = { nuevo ->
-                    viewModel.agregarCoche(nuevo)
+                onConfirm = { nuevoDto, nuevaMatricula ->
+                    viewModel.agregarCoche(nuevoDto, nuevaMatricula)
                     showAddDialog = false
                 }
             )
         }
 
-        // Diálogo para Editar (Nuevo)
+        // --- Diálogo para Editar ---
+        // Movido fuera del bloque 'if (showAddDialog)'
         cocheAEditar?.let { coche ->
-            EditarCoche (
+            EditarCoche(
                 cocheCompleto = coche,
                 onDismiss = { cocheAEditar = null },
-                onConfirm = { cocheActualizado ->
-                    viewModel.actualizarCoche(cocheActualizado)
+                onConfirm = { actualizadoDto, matriculaEditada ->
+                    viewModel.actualizarCoche(actualizadoDto, matriculaEditada)
                     cocheAEditar = null
                 }
             )
@@ -108,11 +109,9 @@ fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit, onUpdate: () -
             Spacer(modifier = Modifier.height(8.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                // Botón de Actualizar (Cambiado icono y color)
                 IconButton(onClick = onUpdate) {
                     Icon(Icons.Default.Create, contentDescription = "Editar", tint = Color(0xFFFBC02D))
                 }
-                // Botón de Borrar
                 IconButton(onClick = onDelete) {
                     Icon(Icons.Default.Delete, contentDescription = "Borrar", tint = Color.Red)
                 }

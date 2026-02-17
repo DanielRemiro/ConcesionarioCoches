@@ -48,4 +48,9 @@ interface ConcesionarioDao {
     // Borrado en cascada
     @Query("DELETE FROM coche")
     suspend fun deleteAllCoches()
+    @Delete
+    suspend fun deleteMatricula(matricula: MatriculaEntity)
+
+    @Query("DELETE FROM coche_cliente_cross_ref WHERE cocheId = :cocheId")
+    suspend fun deleteCocheClienteRefs(cocheId: Long) // Para actualizar interesados
 }

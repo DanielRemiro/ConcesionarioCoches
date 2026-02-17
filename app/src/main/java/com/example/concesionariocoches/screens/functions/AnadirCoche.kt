@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -18,76 +19,44 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.concesionariocoches.api.dto.CocheDto
+import com.example.concesionariocoches.model.matricula.MatriculaEntity
 
 @Composable
-fun AnadirCoche(onDismiss: () -> Unit, onConfirm: (CocheDto) -> Unit) {
-    // Estados para los campos del formulario
+fun AnadirCoche(onDismiss: () -> Unit,
+                onConfirm: (CocheDto, MatriculaEntity) -> Unit) {
     var modelo by remember { mutableStateOf("") }
     var precio by remember { mutableStateOf("") }
-    var marcaId by remember { mutableStateOf("") }
-    var matriculaId by remember { mutableStateOf("") }
+    var numMatricula by remember { mutableStateOf("") }
+    var fechaMatricula by remember { mutableStateOf("") }
+    var marcaId by remember { mutableStateOf("1") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Añadir Nuevo Coche") },
+        title = { Text("Nuevo Coche y Matrícula") },
         text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedTextField(
-                    value = modelo,
-                    onValueChange = { modelo = it },
-                    label = { Text("Modelo (ej: 911 Carrera)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = precio,
-                    onValueChange = { precio = it },
-                    label = { Text("Precio (€)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = marcaId,
-                    onValueChange = { marcaId = it },
-                    label = { Text("ID de Marca (Existente)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                OutlinedTextField(
-                    value = matriculaId,
-                    onValueChange = { matriculaId = it },
-                    label = { Text("ID de Matrícula (Existente)") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Text(
-                    text = "Nota: Asegúrate de que los IDs de marca y matrícula existan en la base de datos.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(value = modelo, onValueChange = { modelo = it }, label = { Text("Modelo") })
+                OutlinedTextField(value = precio, onValueChange = { precio = it }, label = { Text("Precio") })
+                Divider()
+                Text("Datos de Matrícula", style = MaterialTheme.typography.labelMedium)
+                OutlinedTextField(value = numMatricula, onValueChange = { numMatricula = it }, label = { Text("Número de Matrícula") })
+                OutlinedTextField(value = fechaMatricula, onValueChange = { fechaMatricula = it }, label = { Text("Fecha (AAAA-MM-DD)") })
             }
         },
         confirmButton = {
-            Button(
-                onClick = {
-                    // Validamos mínimamente que los campos no estén vacíos
-                    if (modelo.isNotBlank() && precio.isNotBlank()) {
-                        val nuevoCoche = CocheDto(
-                            id = (100..9999).random().toLong(), // ID temporal o generado por API
-                            modelo = modelo,
-                            precio = precio.toDoubleOrNull() ?: 0.0,
-                            marcaId = marcaId.toLongOrNull() ?: 1L,
-                            matriculaId = matriculaId.toLongOrNull() ?: 1L,
-                            clientesIds = emptyList() // Inicialmente sin clientes
-                        )
-                        onConfirm(nuevoCoche)
-                    }
-                }
-            ) {
-                Text("Crear Coche")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancelar") }
+            Button(onClick = {
+                val mId = (1000..9999).random().toLong()
+                val matricula = MatriculaEntity(mId, numMatricula, fechaMatricula)
+                val coche = CocheDto(
+                    id = (1000..9999).random().toLong(),
+                    modelo = modelo,
+                    precio = precio.toDoubleOrNull() ?: 0.0,
+                    marcaId = marcaId.toLong(),
+                    matriculaId = mId,
+                    clientesIds = emptyList() // Aquí podrías añadir lógica para seleccionar clientes
+                )
+                onConfirm(coche, matricula)
+            }) { Text("Crear Todo") }
         }
     )
 }

@@ -15,13 +15,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.dp
 import com.example.concesionariocoches.api.dto.CocheDto
+import com.example.concesionariocoches.model.matricula.MatriculaEntity
 import com.example.concesionariocoches.model.middle.CocheCompleto
 
 @Composable
 fun EditarCoche(
     cocheCompleto: CocheCompleto,
     onDismiss: () -> Unit,
-    onConfirm: (CocheDto) -> Unit
+    onConfirm: (CocheDto, MatriculaEntity) -> Unit // Asegúrate de que acepte DOS parámetros
 ) {
     var modelo by remember { mutableStateOf(cocheCompleto.coche.modelo) }
     var precio by remember { mutableStateOf(cocheCompleto.coche.precio.toString()) }
@@ -41,23 +42,20 @@ fun EditarCoche(
                     onValueChange = { precio = it },
                     label = { Text("Precio (€)") }
                 )
-                Text(
-                    text = "Marca: ${cocheCompleto.marca.nombre}",
-                    style = MaterialTheme.typography.bodySmall
-                )
             }
         },
         confirmButton = {
             Button(onClick = {
                 val dto = CocheDto(
-                    id = cocheCompleto.coche.cocheId, // Mantenemos el ID original
+                    id = cocheCompleto.coche.cocheId,
                     modelo = modelo,
                     precio = precio.toDoubleOrNull() ?: cocheCompleto.coche.precio,
                     marcaId = cocheCompleto.coche.marcaId,
                     matriculaId = cocheCompleto.coche.matriculaId,
                     clientesIds = cocheCompleto.clientesInteresados.map { it.id }
                 )
-                onConfirm(dto)
+                // CORRECCIÓN: Pasar el DTO y la MATRÍCULA actual
+                onConfirm(dto, cocheCompleto.matricula)
             }) {
                 Text("Guardar Cambios")
             }
