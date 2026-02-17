@@ -7,18 +7,17 @@ import androidx.room.Index
 
 @Entity(
     tableName = "matricula",
-    // Esto asegura que no se repitan números de matrícula en la BD
+
     indices = [Index(value = ["numero"], unique = true)]
 )
 data class MatriculaEntity(
-    @PrimaryKey(autoGenerate = false) // Usamos el ID del JSON
+    @PrimaryKey(autoGenerate = false)
     @ColumnInfo(name = "matriculaId")
     val matriculaId: Long,
 
     @ColumnInfo(name = "numero")
-    val numero: String, // Ejemplo: "1234 KLR"
+    val numero: String,
 
-    // En el JSON viene como "fecha_matriculacion"
     @ColumnInfo(name = "fecha_matriculacion")
-    val fechaMatriculacion: String // Guardamos la fecha como String "2023-01-15"
+    val fechaMatriculacion: String
 )

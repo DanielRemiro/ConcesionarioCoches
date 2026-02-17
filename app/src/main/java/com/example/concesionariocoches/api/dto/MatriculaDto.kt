@@ -9,6 +9,6 @@ data class MatriculaDto(
     @SerializedName("numero")
     val numero: String,
 
-    @SerializedName("fecha_matriculacion") // Coincide con tu JSON
+    @SerializedName("fecha_matriculacion")
     val fechaMatriculacion: String
 )

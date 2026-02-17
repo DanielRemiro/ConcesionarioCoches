@@ -7,7 +7,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import com.example.concesionariocoches.api.dto.CocheDto
-import com.example.concesionariocoches.model.coche.CocheEntity
 import com.example.concesionariocoches.model.matricula.MatriculaEntity
 import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.repository.CocheRepository
@@ -37,9 +36,6 @@ class CocheViewModel(private val repository: CocheRepository) : ViewModel() {
         }
     }
 
-    // CocheViewModel.kt
-
-    // Cambiamos CocheEntity por CocheCompleto
     fun eliminarCoche(cocheCompleto: CocheCompleto) {
         viewModelScope.launch {
             repository.borrarTodoElCoche(cocheCompleto)

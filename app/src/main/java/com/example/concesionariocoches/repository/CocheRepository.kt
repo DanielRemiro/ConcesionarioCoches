@@ -15,17 +15,11 @@ class CocheRepository(
     private val api: ConcesionarioApi,
     private val dao: ConcesionarioDao
 ) {
-    // La UI observa esto. Siempre muestra lo que hay en BD local.
-    // Esto devolverá el Coche + Marca + Matrícula + Lista de Clientes
     val coches: Flow<List<CocheCompleto>> = dao.getCochesCompletos()
 
-    // Lógica de sincronización: API -> Base de Datos
 
     suspend fun refreshCoches() {
         try {
-            // --- FASE 1: DATOS INDEPENDIENTES (Sin Foreign Keys) ---
-
-            // 1. Clientes
             val clientes = api.getClientes()
             clientes.forEach { dto ->
                 dao.insertCliente(
@@ -33,7 +27,6 @@ class CocheRepository(
                 )
             }
 
-            // 2. Marcas
             val marcas = api.getMarcas()
             marcas.forEach { dto ->
                 dao.insertMarca(
@@ -41,7 +34,6 @@ class CocheRepository(
                 )
             }
 
-            // 3. Matrículas
             val matriculas = api.getMatriculas()
             matriculas.forEach { dto ->
                 dao.insertMatricula(
@@ -53,9 +45,6 @@ class CocheRepository(
                 )
             }
 
-            // --- FASE 2: DATOS DEPENDIENTES (Coches) ---
-
-            // 4. Coches (Ahora sí es seguro insertarlos porque sus "padres" ya existen)
             val coches = api.getCoches()
             coches.forEach { dto ->
                 // Insertar el Coche
@@ -63,12 +52,11 @@ class CocheRepository(
                     cocheId = dto.id,
                     modelo = dto.modelo,
                     precio = dto.precio,
-                    marcaId = dto.marcaId,       // Room ya encontrará esta marcaId en la BD
-                    matriculaId = dto.matriculaId // Room ya encontrará esta matriculaId
+                    marcaId = dto.marcaId,
+                    matriculaId = dto.matriculaId
                 )
                 dao.insertCoche(cocheEntity)
 
-                // 5. Relaciones N:M (Coche <-> Cliente)
                 dto.clientesIds?.forEach { clienteId ->
                     dao.insertCocheClienteRef(
                         CocheClienteCrossRef(cocheId = dto.id, clienteId = clienteId)
@@ -85,8 +73,6 @@ class CocheRepository(
     }
 
     private suspend fun guardarCocheLocalmente(dto: CocheDto) {
-        // 1. Guardar o actualizar Marca relacionada
-        // (Asumiendo que el DTO trae el objeto marca completo, o al menos sus datos)
         dto.marca?.let { marcaDto ->
             dao.insertMarca(
                 MarcaEntity(
@@ -97,7 +83,6 @@ class CocheRepository(
             )
         }
 
-        // 2. Guardar o actualizar Matrícula relacionada (NUEVO)
         dto.matricula?.let { matriculaDto ->
             dao.insertMatricula(
                 MatriculaEntity(
@@ -108,25 +93,16 @@ class CocheRepository(
             )
         }
 
-        // 3. Guardar el Coche
-        // Nota: Asegúrate de que dto.marcaId y dto.matriculaId no sean nulos
         val cocheEntity = CocheEntity(
             cocheId = dto.id,
             modelo = dto.modelo,
             precio = dto.precio,
-            // descripcion = dto.descripcion, // ELIMINADO
             marcaId = dto.marcaId,
             matriculaId = dto.matriculaId // NUEVO
         )
         dao.insertCoche(cocheEntity)
 
-        // 4. Guardar relaciones N:M con Clientes (NUEVO)
-        // Si el DTO trae una lista de IDs de clientes interesados:
         dto.clientesIds?.forEach { clienteId ->
-            // Primero aseguramos que el cliente exista (si el DTO trae datos del cliente)
-            // Si solo trae IDs, asumimos que el cliente ya se sincronizó en otro proceso
-            // o insertamos solo la referencia.
-
             val referencia = CocheClienteCrossRef(
                 cocheId = dto.id,
                 clienteId = clienteId
@@ -137,16 +113,12 @@ class CocheRepository(
 
     suspend fun crearCoche(cocheDto: CocheDto, matriculaNueva: MatriculaEntity) {
         try {
-            // 1. Enviar a la API (asumiendo que la API maneja la creación de la matrícula o el DTO la incluye)
             val nuevoCoche = api.crearCoche(cocheDto)
 
-            // 2. Insertar Matrícula Localmente primero (para tener el ID disponible)
             dao.insertMatricula(matriculaNueva)
 
-            // 3. Guardar el Coche y sus relaciones
             guardarCocheLocalmente(nuevoCoche)
 
-            // 4. Relaciones N:M con Clientes
             cocheDto.clientesIds?.forEach { clienteId ->
                 dao.insertCocheClienteRef(CocheClienteCrossRef(nuevoCoche.id, clienteId))
             }
@@ -157,25 +129,19 @@ class CocheRepository(
 
     suspend fun borrarCoche(cocheCompleto: CocheCompleto) {
         try {
-            // 1. Intentar borrar en la API
             api.eliminarCoche(cocheCompleto.coche.cocheId)
         } catch (e: Exception) {
-            // Log error
+
         }
 
-        // 2. Borrar el coche de la BD local
         dao.deleteCoche(cocheCompleto.coche)
 
-        // 3. Borrar la matrícula asociada (esto es lo que falta)
-        // Necesitas añadir una función deleteMatricula en tu DAO
         dao.deleteMatricula(cocheCompleto.matricula)
     }
     suspend fun actualizarCoche(cocheDto: CocheDto) {
         try {
-            // 1. Actualización en la API
             api.actualizarCoche(cocheDto.id, cocheDto)
 
-            // 2. Mapear DTO a Entity para Room
             val cocheEntity = CocheEntity(
                 cocheId = cocheDto.id,
                 modelo = cocheDto.modelo,
@@ -184,11 +150,8 @@ class CocheRepository(
                 matriculaId = cocheDto.matriculaId
             )
 
-            // 3. Actualizar en la BD local
-            // Usamos updateCoche que ya definiste en el DAO
             dao.updateCoche(cocheEntity)
 
-            // 4. Opcional: Si el DTO trae nuevos clientes, actualizamos la tabla intermedia
             cocheDto.clientesIds?.forEach { clienteId ->
                 dao.insertCocheClienteRef(CocheClienteCrossRef(cocheDto.id, clienteId))
             }
@@ -201,25 +164,21 @@ class CocheRepository(
         try {
             api.actualizarCoche(dto.id, dto)
 
-            dao.insertMatricula(matricula) // REPLACE actúa como update
+            dao.insertMatricula(matricula)
             dao.updateCoche(CocheEntity(dto.id, dto.modelo, dto.precio, dto.marcaId, matricula.matriculaId))
 
-            // Actualizar interesados: limpiar y reinsertar
             dao.deleteCocheClienteRefs(dto.id)
             dto.clientesIds?.forEach { id ->
                 dao.insertCocheClienteRef(CocheClienteCrossRef(dto.id, id))
             }
-        } catch (e: Exception) { /* Manejar error */ }
+        } catch (e: Exception) {  }
     }
     suspend fun crearCocheCompleto(dto: CocheDto, matricula: MatriculaEntity) {
         try {
-            // 1. API: Crear coche (opcional enviar a API primero)
             val nuevoCoche = api.crearCoche(dto)
 
-            // 2. Local: Insertar la Matrícula nueva
             dao.insertMatricula(matricula)
 
-            // 3. Local: Insertar el Coche vinculando el ID de la matrícula
             val cocheEntity = CocheEntity(
                 cocheId = nuevoCoche.id,
                 modelo = dto.modelo,
@@ -229,11 +188,10 @@ class CocheRepository(
             )
             dao.insertCoche(cocheEntity)
 
-            // 4. Local: Vincular Clientes seleccionados
             dto.clientesIds?.forEach { clienteId ->
                 dao.insertCocheClienteRef(CocheClienteCrossRef(nuevoCoche.id, clienteId))
             }
-        } catch (e: Exception) { /* Manejar error */ }
+        } catch (e: Exception) {  }
     }
     suspend fun borrarTodoElCoche(cocheCompleto: CocheCompleto) {
         api.eliminarCoche(cocheCompleto.coche.cocheId)

@@ -6,8 +6,8 @@ import androidx.room.ColumnInfo
 
 @Entity(tableName = "marca")
 data class MarcaEntity(
-    @PrimaryKey(autoGenerate = false) // Usamos el ID del JSON (1, 2, 3...)
-    @ColumnInfo(name = "marcaId")     // Nombre de la columna en la BD
+    @PrimaryKey(autoGenerate = false)
+    @ColumnInfo(name = "marcaId")
     val marcaId: Long,
 
     @ColumnInfo(name = "nombre")

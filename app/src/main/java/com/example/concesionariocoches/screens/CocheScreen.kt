@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.concesionariocoches.api.dto.CocheDto
 import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.viewmodel.CocheViewModel
 import com.example.concesionariocoches.screens.functions.*
@@ -43,7 +42,6 @@ fun CocheScreen(viewModel: CocheViewModel) {
                     items(coches) { cocheCompleto ->
                         CocheItem(
                             cocheCompleto = cocheCompleto,
-                            // Se pasa el objeto completo para poder borrar también su matrícula
                             onDelete = { viewModel.eliminarCoche(cocheCompleto) },
                             onUpdate = { cocheAEditar = cocheCompleto }
                         )
@@ -52,7 +50,6 @@ fun CocheScreen(viewModel: CocheViewModel) {
             }
         }
 
-        // --- Diálogo para Añadir ---
         if (showAddDialog) {
             AnadirCoche(
                 onDismiss = { showAddDialog = false },
@@ -63,8 +60,6 @@ fun CocheScreen(viewModel: CocheViewModel) {
             )
         }
 
-        // --- Diálogo para Editar ---
-        // Movido fuera del bloque 'if (showAddDialog)'
         cocheAEditar?.let { coche ->
             EditarCoche(
                 cocheCompleto = coche,

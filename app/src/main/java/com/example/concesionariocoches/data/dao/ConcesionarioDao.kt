@@ -12,21 +12,16 @@ import com.example.concesionariocoches.model.middle.CocheCompleto
 @Dao
 interface ConcesionarioDao {
 
-    // --- OPERACIONES DE LECTURA (Relaciones) ---
-    // Esta función requiere que la clase CocheCompleto esté actualizada (ver abajo)
     @Transaction
     @Query("SELECT * FROM coche")
     fun getCochesCompletos(): Flow<List<CocheCompleto>>
 
-    // IMPORTANTE: Asegúrate de que la columna coincida con tu @PrimaryKey en CocheEntity
     @Query("SELECT * FROM coche WHERE cocheId = :id")
     suspend fun getCocheById(id: Long): CocheEntity?
 
-    // --- CRUD BÁSICO ---
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMarca(marca: MarcaEntity): Long
 
-    // NUEVO: Insertar Matrícula
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMatricula(matricula: MatriculaEntity): Long
 
@@ -44,13 +39,11 @@ interface ConcesionarioDao {
 
     @Delete
     suspend fun deleteCoche(coche: CocheEntity)
-
-    // Borrado en cascada
     @Query("DELETE FROM coche")
     suspend fun deleteAllCoches()
     @Delete
     suspend fun deleteMatricula(matricula: MatriculaEntity)
 
     @Query("DELETE FROM coche_cliente_cross_ref WHERE cocheId = :cocheId")
-    suspend fun deleteCocheClienteRefs(cocheId: Long) // Para actualizar interesados
+    suspend fun deleteCocheClienteRefs(cocheId: Long)
 }

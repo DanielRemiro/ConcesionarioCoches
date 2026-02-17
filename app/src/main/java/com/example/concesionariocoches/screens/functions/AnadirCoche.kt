@@ -53,7 +53,7 @@ fun AnadirCoche(onDismiss: () -> Unit,
                     precio = precio.toDoubleOrNull() ?: 0.0,
                     marcaId = marcaId.toLong(),
                     matriculaId = mId,
-                    clientesIds = emptyList() // Aquí podrías añadir lógica para seleccionar clientes
+                    clientesIds = emptyList()
                 )
                 onConfirm(coche, matricula)
             }) { Text("Crear Todo") }

@@ -13,18 +13,17 @@ import com.example.concesionariocoches.model.coche.CocheEntity
     foreignKeys = [
         ForeignKey(
             entity = CocheEntity::class,
-            parentColumns = ["cocheId"], // Debe coincidir con el @PrimaryKey de Coche
+            parentColumns = ["cocheId"],
             childColumns = ["cocheId"],
-            onDelete = ForeignKey.CASCADE // Si borras el coche, se borra la relación
+            onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = ClienteEntity::class,
-            parentColumns = ["clienteId"], // Debe coincidir con el @PrimaryKey de Cliente
+            parentColumns = ["clienteId"],
             childColumns = ["clienteId"],
-            onDelete = ForeignKey.CASCADE // Si borras el cliente, se borra la relación
+            onDelete = ForeignKey.CASCADE
         )
     ],
-    // Creamos índices para que las búsquedas sean rápidas
     indices = [
         Index(value = ["cocheId"]),
         Index(value = ["clienteId"])

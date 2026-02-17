@@ -17,7 +17,7 @@ import com.example.concesionariocoches.model.matricula.MatriculaEntity
         ),
         ForeignKey(entity = MatriculaEntity::class, parentColumns = ["matriculaId"], childColumns = ["matriculaId"])
     ],
-    indices = [Index("marcaId"), Index("matriculaId")] // Buena práctica para rendimiento
+    indices = [Index("marcaId"), Index("matriculaId")]
 )
 data class CocheEntity(
     @PrimaryKey(autoGenerate = true) val cocheId: Long = 0,

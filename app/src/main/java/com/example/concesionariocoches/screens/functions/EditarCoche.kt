@@ -22,7 +22,7 @@ import com.example.concesionariocoches.model.middle.CocheCompleto
 fun EditarCoche(
     cocheCompleto: CocheCompleto,
     onDismiss: () -> Unit,
-    onConfirm: (CocheDto, MatriculaEntity) -> Unit // Asegúrate de que acepte DOS parámetros
+    onConfirm: (CocheDto, MatriculaEntity) -> Unit
 ) {
     var modelo by remember { mutableStateOf(cocheCompleto.coche.modelo) }
     var precio by remember { mutableStateOf(cocheCompleto.coche.precio.toString()) }
@@ -54,7 +54,6 @@ fun EditarCoche(
                     matriculaId = cocheCompleto.coche.matriculaId,
                     clientesIds = cocheCompleto.clientesInteresados.map { it.id }
                 )
-                // CORRECCIÓN: Pasar el DTO y la MATRÍCULA actual
                 onConfirm(dto, cocheCompleto.matricula)
             }) {
                 Text("Guardar Cambios")

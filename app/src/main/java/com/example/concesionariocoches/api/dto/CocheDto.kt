@@ -12,7 +12,6 @@ data class CocheDto(
     @SerializedName("precio")
     val precio: Double,
 
-    // --- Claves foráneas (Lo que viene en tu JSON plano) ---
     @SerializedName("marcaId")
     val marcaId: Long,
 
@@ -22,9 +21,6 @@ data class CocheDto(
     @SerializedName("clientesIds")
     val clientesIds: List<Long>? = emptyList(),
 
-    // --- Objetos anidados (Opcionales) ---
-    // Estos se llenarán solo si tu API usa ?_expand=marca o similar.
-    // El Repository los usaba para guardar la marca/matrícula automáticamente.
     @SerializedName("marca")
     val marca: MarcaDto? = null,
 

@@ -12,6 +12,6 @@ data class ClienteDto(
     @SerializedName("telefono")
     val telefono: String,
 
-    @SerializedName("cochesInteresIds") // Array de enteros [1, 5, 20...]
+    @SerializedName("cochesInteresIds")
     val cochesInteresIds: List<Long>? = emptyList()
 )
