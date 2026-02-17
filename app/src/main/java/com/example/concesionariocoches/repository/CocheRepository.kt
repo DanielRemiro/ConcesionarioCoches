@@ -20,60 +20,6 @@ class CocheRepository(
     val todasLasMarcas: Flow<List<MarcaEntity>> = dao.getAllMarcas()
     val todosLosClientes: Flow<List<ClienteEntity>> = dao.getAllClientes()
 
-    suspend fun refreshCoches() {
-        try {
-            val clientes = api.getClientes()
-            clientes.forEach { dto ->
-                dao.insertCliente(
-                    ClienteEntity(id = dto.id, nombre = dto.nombre, telefono = dto.telefono)
-                )
-            }
-
-            val marcas = api.getMarcas()
-            marcas.forEach { dto ->
-                dao.insertMarca(
-                    MarcaEntity(marcaId = dto.id, nombre = dto.nombre, pais = dto.pais)
-                )
-            }
-
-            val matriculas = api.getMatriculas()
-            matriculas.forEach { dto ->
-                dao.insertMatricula(
-                    MatriculaEntity(
-                        matriculaId = dto.id,
-                        numero = dto.numero,
-                        fechaMatriculacion = dto.fechaMatriculacion
-                    )
-                )
-            }
-
-            val coches = api.getCoches()
-            coches.forEach { dto ->
-                // Insertar el Coche
-                val cocheEntity = CocheEntity(
-                    cocheId = dto.id,
-                    modelo = dto.modelo,
-                    precio = dto.precio,
-                    marcaId = dto.marcaId,
-                    matriculaId = dto.matriculaId
-                )
-                dao.insertCoche(cocheEntity)
-
-                dto.clientesIds?.forEach { clienteId ->
-                    dao.insertCocheClienteRef(
-                        CocheClienteCrossRef(cocheId = dto.id, clienteId = clienteId)
-                    )
-                }
-            }
-
-            android.util.Log.d("API_SYNC", "Sincronización exitosa completa.")
-
-        } catch (e: Exception) {
-            android.util.Log.e("API_ERROR", "Error crítico sincronizando: ${e.message}")
-            e.printStackTrace()
-        }
-    }
-
     private suspend fun guardarCocheLocalmente(dto: CocheDto) {
         dto.marca?.let { marcaDto ->
             dao.insertMarca(
@@ -180,6 +126,43 @@ class CocheRepository(
             dao.deleteCoche(cocheCompleto.coche)
             dao.deleteMatricula(cocheCompleto.matricula)
             android.util.Log.d("LOCAL_DELETE", "Coche eliminado de la base de datos local.")
+        }
+    }
+    suspend fun refreshCoches() {
+        try {
+            // 1. LIMPIEZA TOTAL: Eliminamos datos locales para evitar duplicados o basura
+            dao.deleteAllCoches()
+            dao.deleteAllMarcas()
+            dao.deleteAllMatriculas()
+            dao.deleteAllClientes()
+            dao.deleteAllCocheClienteRefs()
+
+            // 2. SINCRONIZACIÓN: Descargamos e insertamos
+            val clientes = api.getClientes()
+            clientes.forEach { dto ->
+                dao.insertCliente(ClienteEntity(id = dto.id, nombre = dto.nombre, telefono = dto.telefono))
+            }
+
+            val marcas = api.getMarcas()
+            marcas.forEach { dto ->
+                dao.insertMarca(MarcaEntity(marcaId = dto.id, nombre = dto.nombre, pais = dto.pais))
+            }
+
+            val matriculas = api.getMatriculas()
+            matriculas.forEach { dto ->
+                dao.insertMatricula(MatriculaEntity(matriculaId = dto.id, numero = dto.numero, fechaMatriculacion = dto.fechaMatriculacion))
+            }
+
+            val coches = api.getCoches()
+            coches.forEach { dto ->
+                dao.insertCoche(CocheEntity(dto.id, dto.modelo, dto.precio, dto.marcaId, dto.matriculaId))
+                dto.clientesIds?.forEach { clienteId ->
+                    dao.insertCocheClienteRef(CocheClienteCrossRef(cocheId = dto.id, clienteId = clienteId))
+                }
+            }
+            android.util.Log.d("API_SYNC", "Sincronización limpia completada.")
+        } catch (e: Exception) {
+            android.util.Log.e("API_ERROR", "Error sincronizando: ${e.message}")
         }
     }
 }

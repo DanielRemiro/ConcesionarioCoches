@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Refresh // NUEVO IMPORT
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,8 +17,6 @@ import androidx.compose.ui.unit.dp
 import com.example.concesionariocoches.model.middle.CocheCompleto
 import com.example.concesionariocoches.viewmodel.CocheViewModel
 import com.example.concesionariocoches.screens.functions.*
-
-// ... (mismos imports)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,11 +31,19 @@ fun CocheScreen(viewModel: CocheViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Gestión de Concesionario") },
-                // Esto asegura que la barra superior sea sólida y no transparente
+                title = { Text("Gestión de Coches") },
+                actions = {
+                    // BOTÓN DE ACTUALIZACIÓN / SINCRONIZACIÓN
+                    IconButton(onClick = { viewModel.refresh() }) {
+                        Icon(
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Sincronizar con API",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
             )
         },
@@ -46,7 +53,6 @@ fun CocheScreen(viewModel: CocheViewModel) {
             }
         }
     ) { padding ->
-        // USAMOS EL PADDING DEL SCAFFOLD Y FILLMAXSIZE
         Column(
             modifier = Modifier
                 .padding(padding)
@@ -54,12 +60,12 @@ fun CocheScreen(viewModel: CocheViewModel) {
         ) {
             if (coches.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No hay coches disponibles.")
+                    Text("No hay coches. Pulsa el botón de arriba para sincronizar.")
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 80.dp) // Espacio extra abajo para el FAB
+                    contentPadding = PaddingValues(bottom = 80.dp)
                 ) {
                     items(coches) { cocheCompleto ->
                         CocheItem(
@@ -72,7 +78,6 @@ fun CocheScreen(viewModel: CocheViewModel) {
             }
         }
 
-        // Diálogos (están fuera del flujo normal, no se superponen)
         if (showAddDialog) {
             AnadirCoche(
                 marcas = marcas,
@@ -99,6 +104,7 @@ fun CocheScreen(viewModel: CocheViewModel) {
         }
     }
 }
+
 @Composable
 fun CocheItem(cocheCompleto: CocheCompleto, onDelete: () -> Unit, onUpdate: () -> Unit) {
     Card(

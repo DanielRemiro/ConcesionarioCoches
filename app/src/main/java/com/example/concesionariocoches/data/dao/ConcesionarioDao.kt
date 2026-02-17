@@ -50,4 +50,15 @@ interface ConcesionarioDao {
     fun getAllClientes(): Flow<List<ClienteEntity>>
     @Query("SELECT * FROM marca")
     fun getAllMarcas(): Flow<List<MarcaEntity>>
+    @Query("DELETE FROM marca")
+    suspend fun deleteAllMarcas()
+
+    @Query("DELETE FROM matricula")
+    suspend fun deleteAllMatriculas()
+
+    @Query("DELETE FROM cliente")
+    suspend fun deleteAllClientes()
+
+    @Query("DELETE FROM coche_cliente_cross_ref")
+    suspend fun deleteAllCocheClienteRefs()
 }
